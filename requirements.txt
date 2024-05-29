@@ -1,0 +1,17 @@
+torch == 2.1.1
+datasets == 2.14.5
+transformers
+hydra-core==1.3.2
+wandb==0.16.0
+deepspeed
+accelerate
+flash-attn
+torch_tb_profiler
+
+# for eval_zero_shot_task
+evaluate
+sacrebleu
+scikit-learn
+peft
+sqlitedict==2.1.0
+pytablewriter==1.2.0

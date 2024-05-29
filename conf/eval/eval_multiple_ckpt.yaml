@@ -1,0 +1,46 @@
+# usage:
+# CUDA_VISIBLE_DEVICES=0 python eval_zero_shot_task.py --config-name=eval_multiple_ckpt configs.hf=["vanilla_config1","vanilla_config_2"] batch_size=64
+# CUDA_VISIBLE_DEVICES=0 python eval_zero_shot_task.py --config-name=eval_multiple_ckpt configs.block=["block_config1","block_config_2"] batch_size=64
+name: eval_multiple_ckpt
+
+eval_multiple_ckpt: True
+ckpt_step_interval: 10000  # only evaluate ckpt with steps that are multiples of this
+
+wandb: true
+wandb_entity: block-transformer
+wandb_project: zero_shot_eval
+wandb_run_name: null
+
+tasks: lambada_openai,wikitext,hellaswag,arc_easy,sciq
+batch_size: 64
+device: cuda:0
+precision: bf16
+
+# default settings
+num_fewshot: null
+max_batch_size: null
+limit: null
+use_cache: null
+decontamination_ngrams_path: null
+check_integrity: False
+write_out: False
+log_samples: False
+show_config: False
+include_path: null
+gen_kwargs: null
+verbosity: INFO
+
+ckpt_path: null  # TODO: set this to the abs path of the ancestor directory of the ckpts you want to evaluate
+output_path: null
+eval_last_ckpt: False
+min_steps: null  # to filter ckpt by step when eval_last_ckpt is False
+
+configs: {
+  "hf": [
+    #    "vanill_410",
+  ],
+  "block": [
+    #    "block_main_b4_300",
+  ]
+  # override these with the configs you want to evaluate
+}

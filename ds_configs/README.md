@@ -1,0 +1,5 @@
+- default.config
+  - Based on https://github.com/huggingface/transformers/blob/main/tests/deepspeed/ds_config_zero2.json (`580dd87`)
+  - Note that warmup type is log instead of linear by default
+  - Removed "offload_optimizer" (to CPU) since we are likely CPU bottlenecked
+  - Set scheduler.cos_min_ratio to 0.1 following Pythia
