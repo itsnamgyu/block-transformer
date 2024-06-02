@@ -1,8 +1,21 @@
-# block-transformer
+# <img src="https://github.com/raymin0223/fast_robust_early_exit/assets/50742281/c57b9908-72b7-4b80-bbd2-65e7dfec22e6" width="30" height="30"> Block Transformer: Global-to-Local Language Modeling for Fast Inference
 
-Official code for "Block Transformer: Global-to-Local Language Modeling for Fast Inference"
 
-## Getting Started
+**Namgyu Ho<sup>1,2&dagger;\*</sup>, Sangmin Bae<sup>1\*</sup>, Taehyeon Kim<sup>1</sup>, Hyunjik Jo<sup>2</sup>, Yireun Kim<sup>2</sup>, Tal Schuster<sup>3</sup>, Adam Fisch<sup>3</sup>, James Thorne<sup>1&ddagger;</sup>, Se-Young Yun<sup>1&ddagger;</sup>**   
+<sup>**1**</sup>KAIST AI &nbsp; <sup>**2**</sup>LG AI Research &nbsp; <sup>**3**</sup>Google DeepMind &nbsp;    
+&dagger;Work done during an internship at LG AI Research. &nbsp; \*Equal contribution. &nbsp; &ddagger;Corresponding authors.
+
+
+<p align="left">
+<img width="700" src="https://github.com/itsnamgyu/block-transformer/assets/50742281/b6670d09-ee5a-4dc0-a582-f215e1248af1">
+</p>
+
+- We propose **Block Transformer** architecture which adopts hierarchical global-to-local language modeling to autoregressive transformers to mitigate inference bottlenecks of self-attention.
+- Block Transformer models global dependencies through _self-attention between coarse blocks_ at lower layers (in block decoder), and _decodes fine-grained tokens within each local block_ at upper layers (in token decoder).
+- We leverage inference-time benefits of both global and local modules, achieving **10-20x gains in throughput** compared to vanilla transformers with equivalent perplexity.
+
+
+## 🚀 Getting Started
 
 Install requirements and prepare the Pile dataset as described below.
 
@@ -11,7 +24,7 @@ Install requirements and prepare the Pile dataset as described below.
     deepspeed --include localhost:0,1,2,3 --no_local_rank --master_port 29540 pretrain_vanilla_transformer.py --config-name vanilla_31 pythia_pile_idxmaps_path=/path/to/pythia_pile_idxmaps
     ```
 
-- Block transformer training: `pretrain_vanilla_transformer.py`
+- Block transformer training: `pretrain_block_transformer.py`
   ```bash
     deepspeed --include localhost:0,1,2,3 --no_local_rank --master_port 29540 pretrain_block_transformer.py --config-name block_main_b4_5 pythia_pile_idxmaps_path=/path/to/pythia_pile_idxmaps
     ```
@@ -38,7 +51,7 @@ Install requirements and prepare the Pile dataset as described below.
   - By default, batch size is auto-tuned via binary search to maximize VRAM utilization.To set a specific batch size,
     use `++batch_size=64`.
 
-## Requirements
+## 💻 Requirements
 
 Refer to `requirements.txt`.
 
@@ -63,7 +76,7 @@ Update transformers to the latest version if you are using an older version.
 pip install transformers --upgrade
 ```
 
-## Data Preparation
+## 📑 Data Preparation
 
 ### The Pile (Pythia version)
 
