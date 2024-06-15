@@ -1,7 +1,10 @@
 # <img src="https://github.com/raymin0223/fast_robust_early_exit/assets/50742281/c57b9908-72b7-4b80-bbd2-65e7dfec22e6" width="30" height="30"> Block Transformer: Global-to-Local Language Modeling for Fast Inference
 
+<a href="https://arxiv.org/abs/2406.02657"><img src="https://img.shields.io/badge/Paper-arXiv:2406.02657-Green"></a>
+<a href=#bibtex><img src="https://img.shields.io/badge/Paper-BibTex-yellow"></a>
 
-**Namgyu Ho<sup>1,2&dagger;\*</sup>, Sangmin Bae<sup>1\*</sup>, Taehyeon Kim<sup>1</sup>, Hyunjik Jo<sup>2</sup>, Yireun Kim<sup>2</sup>, Tal Schuster<sup>3</sup>, Adam Fisch<sup>3</sup>, James Thorne<sup>1&ddagger;</sup>, Se-Young Yun<sup>1&ddagger;</sup>**   
+**Namgyu Ho<sup>1,2&dagger;\*</sup> &nbsp; Sangmin Bae<sup>1\*</sup> &nbsp; Taehyeon Kim<sup>1</sup> &nbsp; Hyunjik Jo<sup>2</sup> &nbsp; Yireun Kim<sup>2</sup> &nbsp; Tal Schuster<sup>3</sup> &nbsp; Adam Fisch<sup>3</sup>    
+James Thorne<sup>1&ddagger;</sup> &nbsp; Se-Young Yun<sup>1&ddagger;</sup>**   
 <sup>**1**</sup>KAIST AI &nbsp; <sup>**2**</sup>LG AI Research &nbsp; <sup>**3**</sup>Google DeepMind &nbsp;    
 &dagger;Work done during an internship at LG AI Research. &nbsp; \*Equal contribution. &nbsp; &ddagger;Corresponding authors.
 
@@ -108,4 +111,15 @@ cp pythia_deduped_pile_idxmaps/pile_0.87_deduped_text_document.idx pythia_pile_i
 # Checksum for final file
 echo "Expected checksum: 0cd548efd15974d5cca78f9baddbd59220ca675535dcfc0c350087c79f504693"
 sha256sum pythia_pile_idxmaps/pile_0.87_deduped_text_document.bin
+```
+
+## :star2: BibTeX
+
+```
+@article{ho2024block,
+  title={Block Transformer: Global-to-Local Language Modeling for Fast Inference},
+  author={Ho, Namgyu and Bae, Sangmin and Kim, Taehyeon and Jo, Hyunjik and Kim, Yireun and Schuster, Tal and Fisch, Adam and Thorne, James and Yun, Se-Young},
+  journal={arXiv preprint arXiv:2406.02657},
+  year={2024}
+}
 ```
