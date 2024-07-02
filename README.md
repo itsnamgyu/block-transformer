@@ -47,8 +47,8 @@ Install requirements and prepare the Pile dataset as described below.
   
 - Inference throughput wall-time measurement: `measure_generation_time.py`
     ```bash
-    CUDA_VISIBLE_DEVICES=0 python measure_generation_time.py --config_name=block_main_b4_5 ++benchmark_prefix_length=2048 ++benchmark_decode_length=128
-    CUDA_VISIBLE_DEVICES=0 python measure_generation_time.py --config_name=block_main_b4_5 ++benchmark_prefix_length=128 ++benchmark_decode_length=2048
+    CUDA_VISIBLE_DEVICES=0 python measure_generation_time.py --config_name=block_main_b4_5 ++benchmark_prefill_length=2048 ++benchmark_decode_length=128
+    CUDA_VISIBLE_DEVICES=0 python measure_generation_time.py --config_name=block_main_b4_5 ++benchmark_prefill_length=128 ++benchmark_decode_length=2048
     ```
   - Works for both HF and block models.
   - By default, batch size is auto-tuned via binary search to maximize VRAM utilization.To set a specific batch size,

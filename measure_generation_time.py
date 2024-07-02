@@ -3,7 +3,7 @@ Usage
 ```
 python measure_generation_time.py --config_name=block_main_b4_85
 python measure_generation_time.py --config_name=block_main_b4_85 ++benchmark_batch_sizes=[1,2,4,8,16,32,64]
-python measure_generation_time.py --config_name=block_main_b4_85 ++benchmark_prefix_length=1 ++benchmark_decode_length=2048
+python measure_generation_time.py --config_name=block_main_b4_85 ++benchmark_prefill_length=1 ++benchmark_decode_length=2048
 ```
 """
 import math
