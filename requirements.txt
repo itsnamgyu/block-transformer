@@ -1,8 +1,8 @@
-torch == 2.1.1
-datasets == 2.14.5
-transformers
-hydra-core==1.3.2
-wandb==0.16.0
+torch  # tested with 2.1.1
+datasets
+transformers  # tested with 4.36.2 and 4.39.3
+hydra-core
+wandb
 deepspeed
 accelerate
 flash-attn

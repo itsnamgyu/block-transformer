@@ -58,6 +58,12 @@ Install requirements and prepare the Pile dataset as described below.
 
 Refer to `requirements.txt`.
 
+### Transformers version
+
+Our subclasses of GPTNeoX models have been tested under
+
+- `transformers==4.39.3` and `accelerate==0.33.0`
+
 ### Installing FlashAttention
 
 Requires `CUDA>=11.6` and `PyTorch>=1.12` with GPU support.
