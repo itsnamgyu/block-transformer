@@ -36,7 +36,7 @@ def _handle_non_serializable(o):
         return str(o)
 
 
-@hydra.main(config_path="conf/eval", config_name="240425_eval_multiple_ckpt")
+@hydra.main(config_path="conf/eval", config_name="eval_multiple_ckpt")
 def main(cfg: DictConfig):
     if cfg.get("output_path") is None:
         cfg.output_path = cfg.name
@@ -328,7 +328,7 @@ def eval_multiple_ckpt(cfg: DictConfig, eval_logger=None):
                 ckpt_fpath = f"{cfg.ckpt_path}/{config_name}"
                 ckpt_dirs = glob.glob(os.path.join(ckpt_fpath, "checkpoint-*"))
                 step_ckpt_dirs = [(int(ckpt_dir.split("-")[-1]), ckpt_dir) for ckpt_dir in ckpt_dirs]
-                step_ckpt_dirs.sort(reverse=True)
+                step_ckpt_dirs.sort()
                 last_ckpt = step_ckpt_dirs[-1]
                 # filter by step interval
                 interval = cfg.get("ckpt_step_interval", 1)

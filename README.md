@@ -41,8 +41,8 @@ Install requirements and prepare the Pile dataset as described below.
 
 - Zero-shot evaluation: `eval_zero_shot_task.py`
     ```bash
-    CUDA_VISIBLE_DEVICES=0 python eval_zero_shot_task.py --config-name=240425_eval_multiple_ckpt configs.hf=["vanilla_31"] batch_size=64
-    CUDA_VISIBLE_DEVICES=0 python eval_zero_shot_task.py --config-name=240425_eval_multiple_ckpt configs.block=["block_main_b4_5"] batch_size=64
+    CUDA_VISIBLE_DEVICES=0 python eval_zero_shot_task.py --config-name=eval_multiple_ckpt configs.hf=["vanilla_31"] batch_size=64
+    CUDA_VISIBLE_DEVICES=0 python eval_zero_shot_task.py --config-name=eval_multiple_ckpt configs.block=["block_main_b4_5"] batch_size=64
     ```
   
 - Inference throughput wall-time measurement: `measure_generation_time.py`
