@@ -110,9 +110,11 @@ def preprocess_config(cfg: DictConfig, check_mode: str = None):
 
         with open_dict(cfg):
             if cfg.get("random_pad_first_block") is None:
-                cfg.random_pad_first_block = False
+                # Note that the default was set to False for models in our initial arxiv submission
+                cfg.random_pad_first_block = True
             if cfg.get("pad_to_block_boundary") is None:
-                cfg.pad_to_block_boundary = False
+                # Note that the default was set to False for models in our initial arxiv submission
+                cfg.pad_to_block_boundary = True
         if cfg.block_split.distribution != "fixed":
             if cfg.random_pad_first_block or cfg.pad_to_block_boundary:
                 raise ValueError("`random_pad_first_block` and `pad_to_block_boundary` are only supported for fixed "
