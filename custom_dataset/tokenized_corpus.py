@@ -23,7 +23,7 @@ class TokenizedCorpus:
 class TokenizedCorpusDataset(torch.utils.data.Dataset):
     def __init__(self, tokenized_corpus: TokenizedCorpus, length: int, eos_token: int,
                  transforms: list = None, pad_token: int = None, block_length: int = None,
-                 random_pad_first_block: bool = False, pad_to_block_boundary: bool = False, seed: int = 42):
+                 random_pad_first_block: bool = True, pad_to_block_boundary: bool = True, seed: int = 42):
         """
         :param tokenized_corpus:
         :param length:

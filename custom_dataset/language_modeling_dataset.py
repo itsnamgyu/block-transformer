@@ -14,8 +14,8 @@ from transformers import PreTrainedTokenizer
 class LanguageModelingDataset(IterableDataset):
     def __init__(self, dataset: Dataset, tokenizer: PreTrainedTokenizer, block_length, max_length,
                  dataset_text_field=None, data_formatter=None, continuous=True, buffer_size=2 ** 22,
-                 seed=42, global_shuffling=True, local_shuffling=True, random_pad_first_block=False,
-                 pad_to_block_boundary=False, transforms: list = None):
+                 seed=42, global_shuffling=True, local_shuffling=True, random_pad_first_block=True,
+                 pad_to_block_boundary=True, transforms: list = None):
         """
         :param dataset:
         :param tokenizer: make sure the tokenizer automatically adds eos tokens
