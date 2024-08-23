@@ -40,6 +40,10 @@ def _handle_non_serializable(o):
 def main(cfg: DictConfig):
     if cfg.get("output_path") is None:
         cfg.output_path = cfg.name
+
+    if cfg.get("ckpt_path") is None:
+        with open_dict(cfg):
+            cfg.ckpt_path = f"{SAVE_DIR}"
     
     if cfg.get("wandb"): 
         os.environ["WANDB_ENTITY"] = cfg.wandb_entity

@@ -1,6 +1,10 @@
 # usage:
 # CUDA_VISIBLE_DEVICES=0 python eval_zero_shot_task.py --config-name=eval_multiple_ckpt configs.hf=["vanilla_config1","vanilla_config_2"] batch_size=64
 # CUDA_VISIBLE_DEVICES=0 python eval_zero_shot_task.py --config-name=eval_multiple_ckpt configs.block=["block_config1","block_config_2"] batch_size=64
+
+# this eval config assumes that the output_dir of the training config was null or the same as the config name
+# (the part before .yaml)
+
 name: eval_multiple_ckpt
 
 eval_multiple_ckpt: True
@@ -33,7 +37,8 @@ include_path: null
 gen_kwargs: null
 verbosity: INFO
 
-ckpt_path: null  # TODO: set this to the abs path of the ancestor directory of the ckpts you want to evaluate
+ckpt_path: null  # abs path of the ancestor directory of the ckpts you want to evaluate. default is paths.SAVE_DIR
+
 output_path: null
 eval_last_ckpt: False
 min_steps: null  # to filter ckpt by step when eval_last_ckpt is False
