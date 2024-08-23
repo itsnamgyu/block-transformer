@@ -314,7 +314,8 @@ class ZeroshotEvalCallback(TrainerCallback):
         if eval_cfg.get("eval_batch_size") is None:
             OmegaConf.set_struct(eval_cfg, True)
             with open_dict(eval_cfg):
-                eval_cfg.eval_batch_size = args.gradient_accumulation_steps * args.per_device_train_batch_size * args.world_size
+                # assume that inference takes ~4x less memory than training
+                eval_cfg.eval_batch_size = args.per_device_train_batch_size * 4
             warnings.warn(f"If you want to specify the eval_batch_size, use eval_cfg.eval_batch_size")
         
         if self.cfg.zero_shot_eval.get("eval_no_pad", False):
