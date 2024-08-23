@@ -5,6 +5,9 @@ name: eval_multiple_ckpt
 
 eval_multiple_ckpt: True
 ckpt_step_interval: 10000  # only evaluate ckpt with steps that are multiples of this
+# if you don't pretrain Block Transformer with random-length padding when packing documents, set this to True
+# when you evaluate our pretrained checkpoints above 420M parameters, you will need to set this to True
+eval_no_pad: False  
 
 wandb: true
 wandb_entity: block-transformer

@@ -8,7 +8,7 @@ from lm_eval.models.huggingface import HFLM
 from lm_eval.utils import stop_sequences_criteria
 
 
-@register_model("block", "block_transformer")
+@register_model("block_no_pad", "block_transformer_no_pad")
 class BlockTransformerWrapper(HFLM):
     def __init__(
         self,

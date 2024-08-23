@@ -316,6 +316,9 @@ class ZeroshotEvalCallback(TrainerCallback):
             with open_dict(eval_cfg):
                 eval_cfg.eval_batch_size = args.gradient_accumulation_steps * args.per_device_train_batch_size * args.world_size
             warnings.warn(f"If you want to specify the eval_batch_size, use eval_cfg.eval_batch_size")
+        
+        if self.cfg.zero_shot_eval.get("eval_no_pad", False):
+            mode += "_no_pad"
 
         model = lm_eval.api.registry.get_model(mode)(
             pretrained=model,

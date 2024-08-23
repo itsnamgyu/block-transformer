@@ -124,6 +124,9 @@ def eval_zero_shot_task(cfg: DictConfig, eval_logger=None):
                                      decoding_strategy=cfg.token_decoder.decoding_strategy,)
         load_checkpoint_and_dispatch(model, ckpt, device_map="auto")
         
+        if cfg.get("eval_no_pad", False):
+            cfg.model += "_no_pad"
+        
         model = lm_eval.api.registry.get_model(cfg.model)(
             pretrained=model,
             tokenizer=tokenizer,
