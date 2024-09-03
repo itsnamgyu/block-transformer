@@ -50,16 +50,16 @@ min_steps: null  # select checkpoints with steps >= min_steps
 
 configs: {
   "hf": [
-        "vanilla_31",
-        "vanilla_70",
+#        "vanilla_31",
+#        "vanilla_70",
         "vanilla_160",
-        "vanilla_410",
+#        "vanilla_410",
   ],
   "block": [
 #        "block_main_b4_5",
 #        "block_main_b4_19",
 #        "block_main_b4_85",
-#        "block_main_b4_300",
+        "block_main_b4_300",
 #        "block_main_b4_800",
 #        "block_main_b4_1.2b",
   ]
