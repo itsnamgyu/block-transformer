@@ -60,6 +60,7 @@ We share all checkpoints of our main models, pretrained with tens of thousands o
 Research.
 
 - [Dropbox](https://www.dropbox.com/scl/fo/7l7ga148gcc39ykdcqndd/AFw4Fk1XbaABFc-IuAzoyQc?rlkey=zn6cqua65wj835kkifbolr4dj&st=qcjfy53c&dl=0)
+- [Google Drive](https://drive.google.com/drive/folders/1NjdYIBEsgnEWe4TgGvyJC2emOVc8i4Bw?usp=share_link)
 
 To evaluate downloaded checkpoints, set the `ckpt_path` to the root path of the unzipped folder.
 
