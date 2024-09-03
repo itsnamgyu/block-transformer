@@ -1,4 +1,4 @@
-name: 240504_vanilla_31
+name: vanilla_31
 
 wandb: true
 wandb_project: block_transformer

@@ -1,4 +1,4 @@
-name: 240408_poc_vanilla_410
+name: vanilla_410
 
 wandb: true
 wandb_project: block_transformer

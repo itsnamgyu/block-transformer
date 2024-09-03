@@ -1,4 +1,4 @@
-name: vanilla_160
+name: vanilla_70
 
 wandb: true
 wandb_project: block_transformer
@@ -20,13 +20,13 @@ max_length: 2048
 tokenizer: pythia
 
 model: gpt-neo-x
-model_name_or_path: EleutherAI/pythia-160m-deduped
+model_name_or_path: EleutherAI/pythia-70m-deduped
 attn_implementation: flash_attention_2
 
 use_pretrained_weights: false
 
 freeze: false
-learning_rate: 6e-4
+learning_rate: 1e-3
 adam_beta1: 0.9
 adam_beta2: 0.95
 weight_decay: 0.1

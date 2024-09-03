@@ -293,10 +293,8 @@ def _restore_config(cfg, train_config, model, output_path, model_args, step):
     
     if cfg.model == "hf":
         cfg.model_name_or_path = f"{train_config.model},{train_config.model_name_or_path}"
-        if "attn_implementation" in train_config:
-            cfg.attn_implementation = train_config.attn_implementation
-        if "model_config" in train_config:
-            cfg.model_config = train_config.model_config
+        cfg.attn_implementation = train_config.get("attn_implementation", None)
+        cfg.model_config = train_config.get("model_config", None)
     elif cfg.model == "block":
         cfg.block_length = train_config.block_length
         cfg.block_split = train_config.block_split
@@ -351,7 +349,7 @@ def eval_multiple_ckpt(cfg: DictConfig, eval_logger=None):
                     safetensors_path = os.path.join(ckpt_fpath, ckpt_dirs[-1], "model.safetensors")
                     cfg.model_args = f"pretrained={safetensors_path}"
 
-                    print("Evaluating last checkpoint")
+                    print("Evaluating last checkpoint:")
                     print("=" * 80)
                     print(safetensors_path)
                     print("=" * 80)
@@ -361,7 +359,7 @@ def eval_multiple_ckpt(cfg: DictConfig, eval_logger=None):
                 else:
                     results = {config_name: defaultdict(dict)}
 
-                    print("Evaluating all checkpoints")
+                    print("Evaluating checkpoints:")
                     print("=" * 80)
                     for ckpt_dir in ckpt_dirs:
                         if cfg.get("min_steps"):

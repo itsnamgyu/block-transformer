@@ -21,6 +21,8 @@ per_device_train_batch_size: 32
 gradient_accumulation_steps: null
 batch_size_rampup_steps: null
 max_length: 2048
+random_pad_first_block: true
+pad_to_block_boundary: true
 
 tokenizer:
   embedder: pythia

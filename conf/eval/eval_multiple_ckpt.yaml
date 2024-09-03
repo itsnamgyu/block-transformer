@@ -9,16 +9,21 @@ name: eval_multiple_ckpt
 
 eval_multiple_ckpt: True
 ckpt_step_interval: 10000  # only evaluate ckpt with steps that are multiples of this
-# if you don't pretrain Block Transformer with random-length padding when packing documents, set this to True
-# when you evaluate our pretrained checkpoints above 420M parameters, you will need to set this to True
-eval_no_pad: False  
+
+# whether to disable padding for evaluation
+# set eval_no_pad to True when evaluating old pretrained checkpoints with >= 300M parameters.
+# Block Transformers needs to be pretrained with random-length padding in the first block of each document to support
+# padding. We forgot to enable this for models at or above 300M, as shown in the configs.
+# Refer to `random_pad_first_block` and `pad_to_block_boundary` in the training configs.
+# Note that the code is now updated to enable these by default.
+eval_no_pad: False
 
 wandb: true
 wandb_entity: block-transformer
 wandb_project: zero_shot_eval
 wandb_run_name: null
 
-tasks: lambada_openai,wikitext,hellaswag,arc_easy,sciq
+tasks: lambada_openai,wikitext,hellaswag,piqa,arc_easy
 batch_size: 64
 device: cuda:0
 precision: bf16
@@ -40,15 +45,23 @@ verbosity: INFO
 ckpt_path: null  # abs path of the ancestor directory of the ckpts you want to evaluate. default is paths.SAVE_DIR
 
 output_path: null
-eval_last_ckpt: False
-min_steps: null  # to filter ckpt by step when eval_last_ckpt is False
+eval_last_ckpt: False  # if True, only evaluate the last ckpt for each config
+min_steps: null  # select checkpoints with steps >= min_steps
 
 configs: {
   "hf": [
-    #    "vanill_410",
+        "vanilla_31",
+        "vanilla_70",
+        "vanilla_160",
+        "vanilla_410",
   ],
   "block": [
-    #    "block_main_b4_300",
+#        "block_main_b4_5",
+#        "block_main_b4_19",
+#        "block_main_b4_85",
+#        "block_main_b4_300",
+#        "block_main_b4_800",
+#        "block_main_b4_1.2b",
   ]
   # override these with the configs you want to evaluate
 }
