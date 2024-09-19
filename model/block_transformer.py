@@ -1,3 +1,4 @@
+from logging import warning
 from typing import Optional, Union
 
 import torch
@@ -143,7 +144,7 @@ class BlockTransformer(nn.Module):
         block_embeddings = block_embeddings.reshape(-1, self.n_embedding_tokens, self.projection_hidden_size)
         # -> [batch_size * (n_blocks - 1), n_embedding_tokens, projection_hidden_size]
         # == [local_batch_size, n_embedding_tokens, projection_hidden_size]
-        
+
         # for auto_encoding_loss
         if self.use_auto_encoding_loss:
             input_embeds = input_embeds[:, self.n_embedding_tokens:, :].contiguous()
@@ -223,9 +224,8 @@ class BlockTransformer(nn.Module):
             "auto_encoding_loss": auto_encoding_loss,
         }
 
-    def preprocess_inputs_for_generation(self, input_ids: torch.LongTensor):
+    def preprocess_inputs_for_generation(self, input_ids: torch.LongTensor, attention_mask: torch.LongTensor):
         """
-        :param input_ids: left-padded input_ids (for embedder) [batch_size, n]
         :return: {
             "input_ids": torch.Tensor[batch_size, n_blocks, block_length],
             "attention_mask": torch.Tensor[batch_size, n_blocks, block_length],
@@ -233,57 +233,108 @@ class BlockTransformer(nn.Module):
         }
         """
         input_ids = input_ids.view(-1, input_ids.shape[-1])
+        attention_mask = attention_mask.view(-1, attention_mask.shape[-1])
         bs, length = input_ids.shape
 
         block_boundary_remainder = input_ids.shape[-1] % self.block_length
+        pad_length = 0
         if block_boundary_remainder != 0:
             pad_length = self.block_length - block_boundary_remainder
             # left pad with pad_token_id with full_like
             input_ids = torch.nn.functional.pad(input_ids, (pad_length, 0), mode="constant",
                                                 value=self.embedder.config.pad_token_id)
+            attention_mask = torch.nn.functional.pad(attention_mask, (pad_length, 0), mode="constant", value=0)
 
         input_ids = input_ids.view(bs, -1, self.block_length)
-        attention_mask = input_ids.new_ones(input_ids.shape, dtype=torch.long)
-        attention_mask[input_ids == self.embedder.config.pad_token_id] = 0
+        attention_mask = attention_mask.view(bs, -1, self.block_length)
         block_attention_mask = attention_mask.any(dim=-1).long()
 
         return {
             "input_ids": input_ids,
             "attention_mask": attention_mask,
             "block_attention_mask": block_attention_mask,
+            "initial_block_padding": pad_length,
         }
+
+    @staticmethod
+    def revert_block_input_ids_to_vanilla(input_ids, added_initial_block_padding, last_block_unfilled_length):
+        """
+        Converts block format to vanilla format
+        """
+        input_ids = input_ids.view(-1, input_ids.shape[-2] * input_ids.shape[-1])
+        input_ids = input_ids[:, added_initial_block_padding:]
+        if last_block_unfilled_length > 0:
+            input_ids = input_ids[:, :-last_block_unfilled_length]
+        return input_ids
 
     @torch.inference_mode()
     def generate(
         self,
-        input_ids: torch.FloatTensor,
-        attention_mask: torch.LongTensor = None,
-        block_attention_mask: torch.LongTensor = None,
+        input_ids: torch.LongTensor,
+        attention_mask: Optional[torch.LongTensor] = None,
+        block_attention_mask: Optional[torch.LongTensor] = None,
         max_length: int = 100,
         benchmark: bool = False,
+        print_first_sample: bool = False,
+        tokenizer=None,
     ):
         """
+        Inputs may be given in vanilla format or block format.
+        `block_attention_mask` is required if and only if the inputs are in block format.
+
         Parameters:
-            input_ids: should be divided into blocks as follows:
-            [
-                [ [a, b, c, d], [e, f, g, h], [i, j, k, l] ]  # starts with full block
-                [ [P, P, a, b], [c, d, e, f], [g, h, i, j] ]  # starts with partial EOS block (left-token-padding to align block boundary)
-                [ [P, P, P, P], [a, b, c, d], [e, f, g, h] ]  # starts with full EOS block (left-block-padding for batch inference)
-            ]
-            attention_mask: refer to `forward`
-            block_attention_mask: refer to `forward`
+            input_ids:
+            attention_mask:
+            block_attention_mask:
+                If specified, will assume that all inputs are organized in blocks.
             max_length: maximum number of *tokens* to generate (not blocks)
+                Includes prompt length, excludes initial block padding added within this function
             benchmark: if True, print timing information
 
         Returns:
-            input_ids: torch.Tensor[batch_size, n_blocks, block_length]
-                This includes the input_ids that were given as input.
+            input_ids:
+                torch.Tensor[batch_size, n_blocks, block_length] if block format
+                torch.Tensor[batch_size, n_tokens] if vanilla format
         """
-        if input_ids.shape[-1] != self.block_length:
-            raise ValueError(f"input_ids.shape[-1] must be {self.block_length}, got {input_ids.shape[-1]}")
+        if print_first_sample and tokenizer is None:
+            raise ValueError("tokenizer must be specified when print_first_sample is True")
+        added_initial_block_padding = 0  # padding tokens added *within* this function
+        initial_shapes = {
+            "input_ids": input_ids.shape,
+            "attention_mask": attention_mask.shape if attention_mask is not None else None,
+            "block_attention_mask": block_attention_mask.shape if block_attention_mask is not None else None,
+        }
+        vanilla_mode = block_attention_mask is None
+        if vanilla_mode:  # vanilla format
+            d = self.preprocess_inputs_for_generation(input_ids, attention_mask)
+            input_ids = d["input_ids"]
+            attention_mask = d["attention_mask"]
+            block_attention_mask = d["block_attention_mask"]
+            added_initial_block_padding = d["initial_block_padding"]
+        else:  # block format
+            if input_ids.shape[-1] != self.block_length:
+                message = "input_ids.shape[-1] must be equal to self.block_length when block_attention_mask is given"
+                raise ValueError(message)
+            if attention_mask is None:
+                raise ValueError("attention_mask must be specified when block_attention_mask is specified")
+
         n_blocks, block_length = input_ids.shape[-2:]
         input_ids = input_ids.view(-1, n_blocks, block_length)
+        attention_mask = attention_mask.view(-1, n_blocks, block_length)
+        block_attention_mask = block_attention_mask.view(-1, n_blocks)
         batch_size = input_ids.shape[0]
+
+        if input_ids.shape != attention_mask.shape:
+            raise ValueError(f"input_ids and attention_mask must have equivalent shapes. Given: {initial_shapes}")
+        if input_ids.shape[:2] != block_attention_mask.shape[-2:]:
+            raise ValueError(f"input_ids and block_attention_mask must have equivalent shapes. Given: {initial_shapes}")
+
+        if input_ids.shape[1] * input_ids.shape[2] - added_initial_block_padding > max_length:
+            warning.warn("max_length is less than the length of the input_ids. Returning original input_ids.")
+            if vanilla_mode:
+                input_ids = self.revert_block_input_ids_to_vanilla(input_ids, added_initial_block_padding,
+                                                                   last_block_remaining_length=0)
+            return input_ids
 
         if benchmark:
             print(f"Benchmarking generation... (benchmark={benchmark})")
@@ -294,19 +345,6 @@ class BlockTransformer(nn.Module):
             token_decoder_ends = []
             block_decoder_starts = []
             block_decoder_ends = []
-
-        if attention_mask is None:
-            attention_mask = input_ids.new_ones(input_ids.shape, dtype=torch.long)
-            attention_mask[input_ids == self.embedder.config.pad_token_id] = 0
-            if block_attention_mask is not None:
-                raise ValueError("attention_mask must be specified when block_attention_mask is specified")
-        attention_mask = attention_mask.view(-1, n_blocks, block_length)
-
-        if block_attention_mask is None:
-            block_attention_mask = attention_mask.any(dim=1).long()
-        block_attention_mask = block_attention_mask.view(-1, n_blocks)
-
-        assert input_ids.shape == attention_mask.shape
 
         input_block_embeds = self.embed_blocks(input_ids, attention_mask)
         # -> [batch_size, n_blocks, n_embedding_tokens, projection_hidden_size]
@@ -326,10 +364,10 @@ class BlockTransformer(nn.Module):
             if benchmark:
                 block_decoder_starts.append(torch.cuda.Event(enable_timing=True))
                 block_decoder_starts[-1].record()
-                
+
             block_decoder_output = self.block_decoder(inputs_embeds=input_block_embeds, return_dict=True,
-                                                        **block_decoder_kwargs)
-            
+                                                      **block_decoder_kwargs)
+
             if benchmark:
                 block_decoder_ends.append(torch.cuda.Event(enable_timing=True))
                 block_decoder_ends[-1].record()
@@ -340,14 +378,22 @@ class BlockTransformer(nn.Module):
             next_tokens = input_ids.new_ones([batch_size, self.block_length],
                                              dtype=torch.long) * self.token_decoder.config.pad_token_id
             # support partial decoding of final block when max_length is not a multiple of block_length
-            next_token_count = min(max_length - input_ids.shape[1] * input_ids.shape[2], self.block_length)
+            current_length = input_ids.shape[1] * input_ids.shape[2] - added_initial_block_padding
+            next_token_count = min(max_length - current_length, self.block_length)
             block_embeddings = next_block_embeds[decode_mask, :].contiguous()  # [bs, hidden_size]
             block_embeddings = block_embeddings.view(-1, self.n_embedding_tokens, self.projection_hidden_size)
             if benchmark:
                 token_decoder_starts.append(torch.cuda.Event(enable_timing=True))
                 token_decoder_starts[-1].record()
+            # note that first token is reserved for placeholder EOS token in token decoder
             generated = self.token_decoder.generate(block_embeddings=block_embeddings, max_length=next_token_count + 1)
-            next_tokens[decode_mask, :next_token_count] = generated[:, 1:]
+            if unfinished_sequences[0] and print_first_sample:
+                decoded = tokenizer.decode(generated[0, 1:].tolist())
+                decoded = decoded.replace("\n", "\\n")
+                print(decoded, end="", flush=True)
+
+
+            next_tokens[decode_mask, :generated.shape[-1] - 1] = generated[:, 1:]
             if benchmark:
                 token_decoder_ends.append(torch.cuda.Event(enable_timing=True))
                 token_decoder_ends[-1].record()
@@ -395,6 +441,9 @@ class BlockTransformer(nn.Module):
             print("Block decoder total time: ", sum(block_decoder_times))
             print("Token decoder total time: ", sum(token_decoder_times))
 
+        if vanilla_mode:
+            input_ids = self.revert_block_input_ids_to_vanilla(
+                input_ids, added_initial_block_padding, last_block_unfilled_length=block_length - next_token_count)
         return input_ids
 
     def embed_blocks(self, input_ids, attention_mask):
