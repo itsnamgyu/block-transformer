@@ -1,15 +1,20 @@
+from typing import Tuple
+
 import torch
 from omegaconf import DictConfig
-from transformers import AutoConfig, PreTrainedModel
+from tokenizers import Tokenizer
+from transformers import AutoConfig, GPTNeoXTokenizerFast
 from transformers import GPTNeoForCausalLM, GPTNeoXForCausalLM
 
-from model.block_decoder.base import BaseBlockDecoder
-from model.embedder import RobertaEmbedder, RobertaCLSEmbedder, T5Embedder
 from model.block_decoder import GPTNeoBlockDecoder, GPTNeoXBlockDecoder
+from model.block_decoder.base import BaseBlockDecoder
+from model.block_transformer import BlockTransformer
+from model.embedder import RobertaEmbedder, RobertaCLSEmbedder, T5Embedder
 from model.embedder.base import BaseEmbedder
 from model.embedder.lookup import LookupEmbedder, LookupConfig
 from model.token_decoder import GPTNeoTokenDecoder, GPTNeoXTokenDecoder, T5TokenDecoder
 from model.token_decoder.base import BaseTokenDecoder
+from util.tokenizer import load_tokenizer_and_mapper_from_block_config
 
 MODEL_CLS = {
     "gpt-neo": GPTNeoForCausalLM,
@@ -194,6 +199,33 @@ def load_token_decoder_from_config(cfg: DictConfig, block_decoder: BaseBlockDeco
 
         return token_decoder_cls._from_config(config=config, attn_implementation=attn_implementation,
                                               torch_dtype=torch_dtype, **unused_kwargs)
+
+
+def load_block_transformer_from_config(cfg: DictConfig) -> Tuple[BlockTransformer, Tokenizer]:
+    """
+    Does not account for `cfg.load_from_vanilla`.
+    """
+    tokenizer, token_mapper = load_tokenizer_and_mapper_from_block_config(cfg)
+    block_decoder = load_block_decoder_from_config(cfg)
+    embedder = load_embedder_from_config(cfg, block_decoder=block_decoder)
+    token_decoder = load_token_decoder_from_config(cfg, block_decoder=block_decoder)
+    model = BlockTransformer(embedder=embedder,
+                             block_decoder=block_decoder,
+                             token_decoder=token_decoder,
+                             token_mapper=token_mapper,
+                             use_token_decoding_loss=cfg.token_decoding_loss.enable,
+                             use_block_decoding_loss=cfg.block_decoding_loss.enable,
+                             block_decoding_loss_weight=cfg.block_decoding_loss.weight,
+                             decoding_strategy=cfg.token_decoder.decoding_strategy, )
+
+    if isinstance(tokenizer, GPTNeoXTokenizerFast):
+        # pad token exists in vocab but not in gpt-neox tokenizer nor gpt-neox model config
+        # this is done to differentiate eos token and pad token. if not, then we erroneously get the
+        # "A decoder-only architecture is being used, but right-padding was detected!" warning because
+        # token decoding starts with eos
+        token_decoder.generation_config.pad_token_id = 1
+
+    return model, tokenizer
 
 
 def load_block_from_vanilla_checkpoint(cfg: DictConfig, block, vanilla):
