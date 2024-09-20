@@ -167,7 +167,7 @@ if __name__ == "__main__":
     parser.add_argument("--batch_size", type=int, default=128, help="Batch size for generation")
     parser.add_argument("--temperature", type=float, default=1.0, help="Temperature for generation")
     parser.add_argument("--max_length", type=int, default=1334, help="Maximum length for generation")
-    parser.add_argument("--model", type=str, default="vanilla_410",
+    parser.add_argument("--model", type=str, default="block_main_b4_1.2b",
                         help="Model to use for generation (e.g., vanilla_410, block_main_b4_1.2b)")
     parser.add_argument("--checkpoint_root", type=str, default="results",
                         help="Root directory for model checkpoints")
