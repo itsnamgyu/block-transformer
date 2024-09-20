@@ -18,17 +18,17 @@ James Thorne<sup>1&ddagger;</sup> &nbsp; Se-Young Yun<sup>1&ddagger;</sup>**
 - We leverage inference-time benefits of both global and local modules, achieving **10-20x gains in throughput** compared to vanilla transformers with equivalent perplexity.
 
 
-## 🚀 Inference Demo
+# 🚀 Getting Started
 
-Install requirements and download our pretrained checkpoints (see section below).
+To try out pretrained Block Transformer models, install requirements and download our pretrained checkpoints (see sections below).
 
-Make sure to run the following command before running any code to support absolute imports.
+Note, make sure to run the following command before running any code to support absolute imports.
 
 ```
 python setup.py develop
 ```
 
-### Inference with Custom Prompt
+### Inference with Custom Prompts
 
 Use our demo notebook at `./notebooks/inference_demo.ipynb`.
 
@@ -38,7 +38,7 @@ Use our demo notebook at `./notebooks/inference_demo.ipynb`.
 CUDA_VISIBLE_DEVICES=0 python inference_demo.py --model=block_main_b4_1.2b --batch_size=128
 ```
 
-## 💎 Pretrained Checkpoints
+# 💎 Pretrained Checkpoints
 
 We share all checkpoints of our main models, pretrained on tens of thousands of A100 hours. With ❤️ from LG AI
 Research.
@@ -57,47 +57,11 @@ block-transformer/
   |-- ...
 ```
 
-## 📚 Pretraining
-
-- Vanilla (HuggingFace) model training: `pretrain_vanilla_transformer.py`
-    ```bash
-    deepspeed --include localhost:0,1,2,3 --no_local_rank --master_port 29540 pretrain_vanilla_transformer.py --config-name vanilla_31 pythia_pile_idxmaps_path=/path/to/pythia_pile_idxmaps
-    ```
-
-- Block transformer training: `pretrain_block_transformer.py`
-  ```bash
-    deepspeed --include localhost:0,1,2,3 --no_local_rank --master_port 29540 pretrain_block_transformer.py --config-name block_main_b4_5 pythia_pile_idxmaps_path=/path/to/pythia_pile_idxmaps
-    ```
-
-- Using the `torch.distributed` launcher
-    ```bash
-    OMP_NUM_THREADS=4 CUDA_VISIBLE_DEVICES=0,1,2,3 python -m torch.distributed.run --nproc_per_node=4 --master_port=29540
-    ```
-    - Note that this still uses deepspeed optimization. To run without deepspeed optimization,
-      append `--deepspeed=null`.
-
-## 🔬 Evaluation
-
-- Zero-shot evaluation: `eval_zero_shot_task.py`
-    ```bash
-    CUDA_VISIBLE_DEVICES=0 python eval_zero_shot_task.py --config-name=eval_multiple_ckpt configs.hf=["vanilla_31"] batch_size=64
-    CUDA_VISIBLE_DEVICES=0 python eval_zero_shot_task.py --config-name=eval_multiple_ckpt configs.block=["block_main_b4_5"] batch_size=64
-    ```
-  
-- Inference throughput wall-time measurement: `measure_generation_time.py`
-    ```bash
-    CUDA_VISIBLE_DEVICES=0 python measure_generation_time.py --config-name=block_main_b4_5 ++benchmark_prefill_length=2048 ++benchmark_decode_length=128
-    CUDA_VISIBLE_DEVICES=0 python measure_generation_time.py --config-name=block_main_b4_5 ++benchmark_prefill_length=128 ++benchmark_decode_length=2048
-    ```
-  - Works for both HF and block models.
-  - By default, batch size is auto-tuned via binary search to maximize VRAM utilization.To set a specific batch size,
-    use `++batch_size=64`.
-
-## 💻 Requirements
+# 💻 Requirements
 
 Refer to `requirements.txt`.
 
-Make sure to run the following command before running any code to support absolute imports.
+Note, make sure to run the following command before running any code to support absolute imports.
 
 ```
 python setup.py develop
@@ -128,7 +92,43 @@ Building wheels takes a few minutes (we've seen 10 minutes+).
 FlashAttention support for GPTNeoX was added in Dec 7, 2023 and released v4.36.0.
 https://github.com/huggingface/transformers/pull/26463
 
-## 📑 Pretraining Data Preparation
+# 📚 Pretraining
+
+- Vanilla (HuggingFace) model training: `pretrain_vanilla_transformer.py`
+    ```bash
+    deepspeed --include localhost:0,1,2,3 --no_local_rank --master_port 29540 pretrain_vanilla_transformer.py --config-name vanilla_31 pythia_pile_idxmaps_path=/path/to/pythia_pile_idxmaps
+    ```
+
+- Block transformer training: `pretrain_block_transformer.py`
+  ```bash
+    deepspeed --include localhost:0,1,2,3 --no_local_rank --master_port 29540 pretrain_block_transformer.py --config-name block_main_b4_5 pythia_pile_idxmaps_path=/path/to/pythia_pile_idxmaps
+    ```
+
+- Using the `torch.distributed` launcher
+    ```bash
+    OMP_NUM_THREADS=4 CUDA_VISIBLE_DEVICES=0,1,2,3 python -m torch.distributed.run --nproc_per_node=4 --master_port=29540
+    ```
+    - Note that this still uses deepspeed optimization. To run without deepspeed optimization,
+      append `--deepspeed=null`.
+
+# 🔬 Evaluation
+
+- Zero-shot evaluation: `eval_zero_shot_task.py`
+    ```bash
+    CUDA_VISIBLE_DEVICES=0 python eval_zero_shot_task.py --config-name=eval_multiple_ckpt configs.hf=["vanilla_31"] batch_size=64
+    CUDA_VISIBLE_DEVICES=0 python eval_zero_shot_task.py --config-name=eval_multiple_ckpt configs.block=["block_main_b4_5"] batch_size=64
+    ```
+  
+- Inference throughput wall-time measurement: `measure_generation_time.py`
+    ```bash
+    CUDA_VISIBLE_DEVICES=0 python measure_generation_time.py --config-name=block_main_b4_5 ++benchmark_prefill_length=2048 ++benchmark_decode_length=128
+    CUDA_VISIBLE_DEVICES=0 python measure_generation_time.py --config-name=block_main_b4_5 ++benchmark_prefill_length=128 ++benchmark_decode_length=2048
+    ```
+  - Works for both HF and block models.
+  - By default, batch size is auto-tuned via binary search to maximize VRAM utilization.To set a specific batch size,
+    use `++batch_size=64`.
+
+# 📑 Pretraining Data Preparation
 
 ### The Pile (Pythia version)
 
