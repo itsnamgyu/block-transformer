@@ -219,10 +219,10 @@ def load_block_transformer_from_config(cfg: DictConfig) -> Tuple[BlockTransforme
                              decoding_strategy=cfg.token_decoder.decoding_strategy, )
 
     if isinstance(tokenizer, GPTNeoXTokenizerFast):
-        # pad token exists in vocab but not in gpt-neox tokenizer nor gpt-neox model config
-        # this is done to differentiate eos token and pad token. if not, then we erroneously get the
+        # This is done to differentiate eos token and pad token. if not, then we erroneously get the
         # "A decoder-only architecture is being used, but right-padding was detected!" warning because
-        # token decoding starts with eos
+        # token decoding starts with a placeholder eos
+        # Note that token id 1 is not used by the model
         token_decoder.generation_config.pad_token_id = 1
 
     return model, tokenizer
