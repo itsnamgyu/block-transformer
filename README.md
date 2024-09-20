@@ -29,7 +29,7 @@ https://www.youtube.com/watch?v=c0D7EvffYnU
 
 # 🚀 Getting Started
 
-To try out pretrained Block Transformer models, install requirements and download our pretrained checkpoints (see sections below).
+To try out our pretrained Block Transformer models, install requirements and download our pretrained checkpoints (see sections below).
 
 Note, make sure to run the following command before running any code to support absolute imports.
 
