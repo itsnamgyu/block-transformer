@@ -17,6 +17,15 @@ James Thorne<sup>1&ddagger;</sup> &nbsp; Se-Young Yun<sup>1&ddagger;</sup>**
 - Block Transformer models global dependencies through _self-attention between coarse blocks_ at lower layers (in block decoder), and _decodes fine-grained tokens within each local block_ at upper layers (in token decoder).
 - We leverage inference-time benefits of both global and local modules, achieving **10-20x gains in throughput** compared to vanilla transformers with equivalent perplexity.
 
+## ⚡️ Real-World Decoding Speed Comparison
+
+https://www.youtube.com/watch?v=c0D7EvffYnU
+
+<div align="left">
+      <a href="https://www.youtube.com/watch?v=2pPmRU0i85E">
+         <img src="https://img.youtube.com/vi/2pPmRU0i85E/0.jpg" style="width:25%;">
+      </a>
+</div>
 
 # 🚀 Getting Started
 
