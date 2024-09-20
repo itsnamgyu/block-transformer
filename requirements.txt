@@ -1,10 +1,10 @@
 torch  # tested with 2.1.1
 datasets
-transformers  # tested with 4.36.2 and 4.39.3
+transformers==4.39.3
+accelerate==0.33.0
 hydra-core
 wandb
 deepspeed
-accelerate
 flash-attn
 torch_tb_profiler
 

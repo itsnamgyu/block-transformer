@@ -18,9 +18,46 @@ James Thorne<sup>1&ddagger;</sup> &nbsp; Se-Young Yun<sup>1&ddagger;</sup>**
 - We leverage inference-time benefits of both global and local modules, achieving **10-20x gains in throughput** compared to vanilla transformers with equivalent perplexity.
 
 
-## 🚀 Getting Started
+## 🚀 Inference Demo
 
-Install requirements and prepare the Pile dataset as described below.
+Install requirements and download our pretrained checkpoints (see section below).
+
+Make sure to run the following command before running any code to support absolute imports.
+
+```
+python setup.py develop
+```
+
+### Inference with Custom Prompt
+
+Use our demo notebook at `./notebooks/inference_demo.ipynb`.
+
+### Batch Inference Speed Demo
+
+```
+CUDA_VISIBLE_DEVICES=0 python inference_demo.py --model=block_main_b4_1.2b --batch_size=128
+```
+
+## 💎 Pretrained Checkpoints
+
+We share all checkpoints of our main models, pretrained on tens of thousands of A100 hours. With ❤️ from LG AI
+Research.
+
+- [Dropbox](https://www.dropbox.com/scl/fo/7l7ga148gcc39ykdcqndd/AFw4Fk1XbaABFc-IuAzoyQc?rlkey=zn6cqua65wj835kkifbolr4dj&st=qcjfy53c&dl=0)
+- [Google Drive](https://drive.google.com/drive/folders/1NjdYIBEsgnEWe4TgGvyJC2emOVc8i4Bw?usp=share_link)
+
+To use our code as-is, unzip the checkpoints into the `./results` directory, as shown below.
+
+```
+block-transformer/
+|-- results/
+  |-- block_main_b4_1.2b/
+    |-- checkpoint-570000/
+      |-- model.safetensors
+  |-- ...
+```
+
+## 📚 Pretraining
 
 - Vanilla (HuggingFace) model training: `pretrain_vanilla_transformer.py`
     ```bash
@@ -39,6 +76,8 @@ Install requirements and prepare the Pile dataset as described below.
     - Note that this still uses deepspeed optimization. To run without deepspeed optimization,
       append `--deepspeed=null`.
 
+## 🔬 Evaluation
+
 - Zero-shot evaluation: `eval_zero_shot_task.py`
     ```bash
     CUDA_VISIBLE_DEVICES=0 python eval_zero_shot_task.py --config-name=eval_multiple_ckpt configs.hf=["vanilla_31"] batch_size=64
@@ -54,29 +93,24 @@ Install requirements and prepare the Pile dataset as described below.
   - By default, batch size is auto-tuned via binary search to maximize VRAM utilization.To set a specific batch size,
     use `++batch_size=64`.
 
-## 💎 Pretrained Checkpoints
-
-We share all checkpoints of our main models, pretrained with tens of thousands of A100 hours. With ❤️ from LG AI
-Research.
-
-- [Dropbox](https://www.dropbox.com/scl/fo/7l7ga148gcc39ykdcqndd/AFw4Fk1XbaABFc-IuAzoyQc?rlkey=zn6cqua65wj835kkifbolr4dj&st=qcjfy53c&dl=0)
-- [Google Drive](https://drive.google.com/drive/folders/1NjdYIBEsgnEWe4TgGvyJC2emOVc8i4Bw?usp=share_link)
-
-To evaluate downloaded checkpoints, set the `ckpt_path` to the root path of the unzipped folder.
-
-```bash
-CUDA_VISIBLE_DEVICES=0 python eval_zero_shot_task.py --config-name=eval_multiple_ckpt ckpt_path=/path/to/root
-```
-
 ## 💻 Requirements
 
 Refer to `requirements.txt`.
 
+Make sure to run the following command before running any code to support absolute imports.
+
+```
+python setup.py develop
+```
+
 ### Transformers version
 
-Our subclasses of GPTNeoX models have been tested under
+Our subclasses of GPTNeoX models for Block Transformer have been tested under
 
-- `transformers==4.39.3` and `accelerate==0.33.0`
+```
+transformers==4.39.3
+accelerate==0.33.0
+```
 
 ### Installing FlashAttention
 
@@ -93,13 +127,8 @@ Building wheels takes a few minutes (we've seen 10 minutes+).
 
 FlashAttention support for GPTNeoX was added in Dec 7, 2023 and released v4.36.0.
 https://github.com/huggingface/transformers/pull/26463
-Update transformers to the latest version if you are using an older version.
 
-```
-pip install transformers --upgrade
-```
-
-## 📑 Data Preparation
+## 📑 Pretraining Data Preparation
 
 ### The Pile (Pythia version)
 
