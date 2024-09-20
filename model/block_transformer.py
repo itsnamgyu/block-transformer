@@ -275,8 +275,7 @@ class BlockTransformer(nn.Module):
         block_attention_mask: Optional[torch.LongTensor] = None,
         max_length: int = 100,
         benchmark: bool = False,
-        print_first_sample: bool = False,
-        tokenizer=None,
+        streamer=None,
     ):
         """
         Inputs may be given in vanilla format or block format.
@@ -296,8 +295,6 @@ class BlockTransformer(nn.Module):
                 torch.Tensor[batch_size, n_blocks, block_length] if block format
                 torch.Tensor[batch_size, n_tokens] if vanilla format
         """
-        if print_first_sample and tokenizer is None:
-            raise ValueError("tokenizer must be specified when print_first_sample is True")
         added_initial_block_padding = 0  # padding tokens added *within* this function
         initial_shapes = {
             "input_ids": input_ids.shape,
@@ -386,12 +383,8 @@ class BlockTransformer(nn.Module):
                 token_decoder_starts.append(torch.cuda.Event(enable_timing=True))
                 token_decoder_starts[-1].record()
             # note that first token is reserved for placeholder EOS token in token decoder
-            generated = self.token_decoder.generate(block_embeddings=block_embeddings, max_length=next_token_count + 1)
-            if unfinished_sequences[0] and print_first_sample:
-                decoded = tokenizer.decode(generated[0, 1:].tolist())
-                decoded = decoded.replace("\n", "\\n")
-                print(decoded, end="", flush=True)
-
+            generated = self.token_decoder.generate(block_embeddings=block_embeddings, max_length=next_token_count + 1,
+                                                    streamer=streamer)
 
             next_tokens[decode_mask, :generated.shape[-1] - 1] = generated[:, 1:]
             if benchmark:
