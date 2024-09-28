@@ -1,4 +1,4 @@
-# <img src="https://github.com/raymin0223/fast_robust_early_exit/assets/50742281/c57b9908-72b7-4b80-bbd2-65e7dfec22e6" width="30" height="30"> Block Transformer: Global-to-Local Language Modeling for Fast Inference
+# <img src="https://github.com/raymin0223/fast_robust_early_exit/assets/50742281/c57b9908-72b7-4b80-bbd2-65e7dfec22e6" width="30" height="30"> Block Transformer: Global-to-Local Language Modeling for Fast Inference (NeurIPS 2024)
 
 <a href="https://arxiv.org/abs/2406.02657"><img src="https://img.shields.io/badge/Paper-arXiv:2406.02657-Green"></a>
 <a href=#bibtex><img src="https://img.shields.io/badge/Paper-BibTex-yellow"></a>
