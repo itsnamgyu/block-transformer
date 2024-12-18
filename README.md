@@ -19,7 +19,7 @@ James Thorne<sup>1&ddagger;</sup> &nbsp; Se-Young Yun<sup>1&ddagger;</sup>**
 
 ## ⚡️ Real-World Decoding Speed Comparison
 
-https://www.youtube.com/watch?v=c0D7EvffYnU
+[https://www.youtube.com/watch?v=c0D7EvffYnU](https://youtu.be/9k9n0RkPBCI?feature=shared)
 
 <div align="left">
       <a href="https://youtu.be/9k9n0RkPBCI?feature=shared">
