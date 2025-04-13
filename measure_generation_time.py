@@ -139,24 +139,23 @@ def generate_with_block_model_and_measure_time(model: BlockTransformer, prefill_
     """
     max_length = get_max_length(model.block_length, prefill_length, decode_length)
     input_ids = torch.randint(0, model.config.vocab_size, (batch_size, prefill_length))
-    inputs = model.preprocess_inputs_for_generation(input_ids.to(DEVICE))
 
     start = torch.cuda.Event(enable_timing=True)
     end = torch.cuda.Event(enable_timing=True)
 
     start.record()
     if log_path is None:
-        output = model.generate(**inputs, max_length=max_length, benchmark=False)
+        output = model.generate(input_ids.to(DEVICE), max_length=max_length, benchmark=False)
     else:
         with profile(activities=[ProfilerActivity.CPU, ProfilerActivity.CUDA],
                      record_shapes=False, profile_memory=True, with_stack=False) as prof:
             with record_function("model_inference"):
-                output = model.generate(**inputs, max_length=max_length, benchmark=False)
+                output = model.generate(input_ids.to(DEVICE), max_length=max_length, benchmark=False)
         print(prof.key_averages().table(sort_by="cuda_time_total", row_limit=10))
         prof.export_chrome_trace(log_path)
     end.record()
 
-    assert output.shape[1] * output.shape[2] == math.ceil(max_length / model.block_length) * model.block_length
+    assert output.shape[1] == max_length or print(output.shape[1])
     torch.cuda.synchronize()
 
     return start.elapsed_time(end)

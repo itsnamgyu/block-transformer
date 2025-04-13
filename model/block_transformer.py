@@ -224,8 +224,13 @@ class BlockTransformer(nn.Module):
             "auto_encoding_loss": auto_encoding_loss,
         }
 
-    def preprocess_inputs_for_generation(self, input_ids: torch.LongTensor, attention_mask: torch.LongTensor):
+    def preprocess_inputs_for_generation(self,
+                                         input_ids: torch.LongTensor,
+                                         attention_mask: Optional[torch.LongTensor] = None):
         """
+        Convert vanilla format generation inputs to block format. Note that this is called automatically by
+        BlockTranformer.generate.
+
         :return: {
             "input_ids": torch.Tensor[batch_size, n_blocks, block_length],
             "attention_mask": torch.Tensor[batch_size, n_blocks, block_length],
@@ -233,7 +238,11 @@ class BlockTransformer(nn.Module):
         }
         """
         input_ids = input_ids.view(-1, input_ids.shape[-1])
-        attention_mask = attention_mask.view(-1, attention_mask.shape[-1])
+        if attention_mask is None:
+            attention_mask = input_ids.new_ones(input_ids.shape, dtype=torch.long)
+            attention_mask[input_ids == self.embedder.config.pad_token_id] = 0
+        else:
+            attention_mask = attention_mask.view(-1, attention_mask.shape[-1])
         bs, length = input_ids.shape
 
         block_boundary_remainder = input_ids.shape[-1] % self.block_length
@@ -301,7 +310,7 @@ class BlockTransformer(nn.Module):
             "attention_mask": attention_mask.shape if attention_mask is not None else None,
             "block_attention_mask": block_attention_mask.shape if block_attention_mask is not None else None,
         }
-        vanilla_mode = block_attention_mask is None
+        vanilla_mode = block_attention_mask is None  # inputs are in vanilla transformer.generate format
         if vanilla_mode:  # vanilla format
             d = self.preprocess_inputs_for_generation(input_ids, attention_mask)
             input_ids = d["input_ids"]
